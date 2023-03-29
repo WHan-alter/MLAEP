@@ -1,4 +1,5 @@
 # Machine Learning-guided Antigenic Evolution Prediction (MLAEP)
+[![DOI](https://zenodo.org/badge/586380621.svg)](https://zenodo.org/badge/latestdoi/586380621)
 
 Here we introduce the Machine Learning-guided Antigenic Evolution Prediction (MLAEP), which combines structure modeling, multi-task learning, and genetic algorithm to model the viral fitness landscape and explore the antigenic evolution via in silico directed evolution.
 
@@ -62,3 +63,7 @@ To sythesize the high-risk variants:
     bash scripts/run_synthetic.sh
 ```
 
+
+## Citation
+If you find our work useful or use our software in your research, please cite our paper:
+Han, Wenkai, et al. "Predicting the antigenic evolution of SARS-COV-2 with deep learning." bioRxiv (2022): 2022-06.
