@@ -25,17 +25,37 @@ print("model in device:",next(model.parameters()).device)
 model.eval()
 
 
-data=pd.read_csv(args.seq,index_col=0)
+data=pd.read_csv(args.seq)
 idx,strs,tokens=batch_converter([(1,s) for s in data.seq.to_list()])
 all_result=np.empty((0,9,2))
 embedding=np.empty((0,9,2580))
 for batch_token in torch.split(tokens,10):
     predict=model(batch_token.cuda(),labels=None)
     embedding=np.append(embedding,predict.embedding.cpu().detach().numpy(),axis=0)
-    all_result=np.append(all_result,predict.logits.cpu().detach().numpy(),axis=0)
+    all_result=np.append(all_result,predict.logits.softmax(axis=-1).cpu().detach().numpy(),axis=0)
+
+labels = ["ACE2", "COV2-2096", "COV2-2832", "COV2-2094", "COV2-2050", "COV2-2677", "COV2-2479", "COV2-2165","COV2-2499"]
+arr = all_result
+# Select "bind" values for ACE2 and "escape" values for the rest
+values = np.hstack([arr[:, 0, 0].reshape(-1, 1), arr[:, 1:, 1]])
+
+# Format values as "(class)value"
+formatted_values = np.empty_like(values, dtype=object)
+formatted_values[:, 0] = ["bind" if val>0.5 else "non-bind" for val in values[:, 0]]
+for i in range(1, 9):
+    formatted_values[:, i] = ["escape" if val>0.5 else "non-escape"for val in values[:, i]]
+
+# Convert to DataFrame
+df = pd.DataFrame(formatted_values, columns=labels)
+df["id"] = data.id
+df = df.set_index("id")
+#import pdb; pdb.set_trace()
+df.to_csv(f"{args.out}/prediction.csv")
 if args.prediction:
+    #import pdb; pdb.set_trace()
     with open(args.out+"/prediction.npy","ab") as f1 :
         np.save(f1,all_result)
+
 
 if args.embeddings:
     with open(args.out+"/embedding.npy","ab") as f2 :
